@@ -1,13 +1,10 @@
 #include "monty.h"
 
-#define _GNU_SOURCE
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-
+/**
+ * open_file - opens a file
+ * @file_name: the file namepath
+ * Return: void
+ */
 
 void open_file(char *file_name)
 {
@@ -19,6 +16,13 @@ void open_file(char *file_name)
 	read_file(fd);
 	fclose(fd);
 }
+
+
+/**
+ * read_file - reads a file
+ * @fd: pointer to file descriptor
+ * Return: void
+ */
 
 void read_file(FILE *fd)
 {
@@ -32,6 +36,17 @@ void read_file(FILE *fd)
 	}
 	free(buffer);
 }
+
+
+/**
+ * parse_line - Separates each line into tokens to determine
+ * which function to call
+ * @buffer: line from the file
+ * @line_number: line number
+ * @format:  storage format. If 0 Nodes will be entered as a stack.
+ * if 1 nodes will be entered as a queue.
+ * Return: Returns 0 if the opcode is stack. 1 if queue.
+ */
 
 int parse_line(char *buffer, int line_number, int format)
 {
@@ -55,6 +70,15 @@ int parse_line(char *buffer, int line_number, int format)
 	return (format);
 }
 
+/**
+ * find_func - find the appropriate function for the opcode
+ * @opcode: opcode
+ * @value: argument of opcode
+ * @format:  storage format. If 0 Nodes will be entered as a stack.
+ * @ln: line number
+ * if 1 nodes will be entered as a queue.
+ * Return: void
+ */
 void find_func(char *opcode, char *value, int ln, int format)
 {
 	int i;
@@ -94,6 +118,16 @@ void find_func(char *opcode, char *value, int ln, int format)
 		err(3, ln, opcode);
 }
 
+
+/**
+ * call_fun - Calls the required function.
+ * @func: Pointer to the function that is about to be called.
+ * @op: string representing the opcode.
+ * @val: string representing a numeric value.
+ * @ln: line numeber for the instruction.
+ * @format: Format specifier. If 0 Nodes will be entered as a stack.
+ * if 1 nodes will be entered as a queue.
+ */
 void call_fun(op_func func, char *op, char *val, int ln, int format)
 {
 	stack_t *node;
@@ -123,95 +157,4 @@ void call_fun(op_func func, char *op, char *val, int ln, int format)
 	}
 	else
 		func(&head, ln);
-}
-
-
-
-void err(int error_code, ...)
-{
-	va_list ag;
-	char *op;
-	int l_num;
-
-	va_start(ag, error_code);
-	switch (error_code)
-	{
-		case 1:
-			fprintf(stderr, "USAGE: monty file\n");
-			break;
-		case 2:
-			fprintf(stderr, "Error: Can't open file %s\n",
-				va_arg(ag, char *));
-			break;
-		case 3:
-			l_num = va_arg(ag, int);
-			op = va_arg(ag, char *);
-			fprintf(stderr, "L%d: unknown instruction %s\n", l_num, op);
-			break;
-		case 4:
-			fprintf(stderr, "Error: malloc failed\n");
-			break;
-		case 5:
-			fprintf(stderr, "L%d: usage: push integer\n", va_arg(ag, int));
-			break;
-		default:
-			break;
-	}
-	free_nodes();
-	exit(EXIT_FAILURE);
-}
-
-void more_err(int error_code, ...)
-{
-	va_list ag;
-	char *op;
-	int l_num;
-
-	va_start(ag, error_code);
-	switch (error_code)
-	{
-		case 6:
-			fprintf(stderr, "L%d: can't pint, stack empty\n",
-				va_arg(ag, int));
-			break;
-		case 7:
-			fprintf(stderr, "L%d: can't pop an empty stack\n",
-				va_arg(ag, int));
-			break;
-		case 8:
-			l_num = va_arg(ag, unsigned int);
-			op = va_arg(ag, char *);
-			fprintf(stderr, "L%d: can't %s, stack too short\n", l_num, op);
-			break;
-		case 9:
-			fprintf(stderr, "L%d: division by zero\n",
-				va_arg(ag, unsigned int));
-			break;
-		default:
-			break;
-	}
-	free_nodes();
-	exit(EXIT_FAILURE);
-}
-
-void string_err(int error_code, ...)
-{
-	va_list ag;
-	int l_num;
-
-	va_start(ag, error_code);
-	l_num = va_arg(ag, int);
-	switch (error_code)
-	{
-		case 10:
-			fprintf(stderr, "L%d: can't pchar, value out of range\n", l_num);
-			break;
-		case 11:
-			fprintf(stderr, "L%d: can't pchar, stack empty\n", l_num);
-			break;
-		default:
-			break;
-	}
-	free_nodes();
-	exit(EXIT_FAILURE);
 }
